@@ -1,9 +1,12 @@
-from django.urls import path
-from .views import CreateProductView, ListProductView, AddStockView, RemoveStockView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import ProductViewSet, VariantViewSet, SubVariantViewSet
+
+router = DefaultRouter()
+router.register(r'products', ProductViewSet)
+router.register(r'variants', VariantViewSet)
+router.register(r'subvariants', SubVariantViewSet)
 
 urlpatterns = [
-    path('products/', CreateProductView.as_view(), name='create_product'),
-    path('products/list/', ListProductView.as_view(), name='list_product'),
-    path('stock/add/<uuid:variant_id>/', AddStockView.as_view(), name='add_stock'),
-    path('stock/remove/<uuid:variant_id>/', RemoveStockView.as_view(), name='remove_stock'),
+    path('', include(router.urls)),
 ]

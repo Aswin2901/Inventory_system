@@ -1,36 +1,49 @@
-from rest_framework import generics, status
+from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from .models import Products, SubVariants
-from .serializers import ProductSerializer
+from rest_framework import status
+from .models import Products, Variants, SubVariants
+from .serializers import ProductSerializer, VariantSerializer, SubVariantSerializer
 
-class CreateProductView(generics.CreateAPIView):
+class ProductViewSet(viewsets.ModelViewSet):
     queryset = Products.objects.all()
     serializer_class = ProductSerializer
 
-class ListProductView(generics.ListAPIView):
-    queryset = Products.objects.all()
-    serializer_class = ProductSerializer
+    def get_serializer(self, *args, **kwargs):
+        kwargs['context'] = {'request': self.request}
+        return super().get_serializer(*args, **kwargs)
 
-class AddStockView(APIView):
-    def post(self, request, variant_id):
-        try:
-            subvariant = SubVariants.objects.get(pk=variant_id)
-            subvariant.Stock += request.data['amount']
-            subvariant.save()
-            return Response({'status': 'Stock added successfully'}, status=status.HTTP_200_OK)
-        except SubVariants.DoesNotExist:
-            return Response({'error': 'Variant not found'}, status=status.HTTP_404_NOT_FOUND)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-class RemoveStockView(APIView):
-    def post(self, request, variant_id):
-        try:
-            subvariant = SubVariants.objects.get(pk=variant_id)
-            if subvariant.Stock >= request.data['amount']:
-                subvariant.Stock -= request.data['amount']
-                subvariant.save()
-                return Response({'status': 'Stock removed successfully'}, status=status.HTTP_200_OK)
-            else:
-                return Response({'error': 'Insufficient stock'}, status=status.HTTP_400_BAD_REQUEST)
-        except SubVariants.DoesNotExist:
-            return Response({'error': 'Variant not found'}, status=status.HTTP_404_NOT_FOUND)
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+class VariantViewSet(viewsets.ModelViewSet):
+    queryset = Variants.objects.all()
+    serializer_class = VariantSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+class SubVariantViewSet(viewsets.ModelViewSet):
+    queryset = SubVariants.objects.all()
+    serializer_class = SubVariantSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
