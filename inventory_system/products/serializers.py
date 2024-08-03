@@ -1,23 +1,24 @@
 from rest_framework import serializers
 from .models import Products, Variants, SubVariants
+import uuid
 
 class SubVariantSerializer(serializers.ModelSerializer):
-    options = serializers.ListField(child=serializers.CharField(), required=False)  # Handle nested options
+    options = serializers.ListField(child=serializers.CharField(), required=False, allow_null=True)  # Handle nested options
 
     class Meta:
         model = SubVariants
-        fields = ['id', 'SubVariantName', 'Stock', 'options']  # Include 'options'
+        fields = ['id', 'SubVariantName', 'Stock', 'options']
 
 class VariantSerializer(serializers.ModelSerializer):
-    subvariants = SubVariantSerializer(many=True, required=False)
-    options = serializers.ListField(child=serializers.CharField(), required=False)  # Handle options
+    subvariants = SubVariantSerializer(many=True, required=False, allow_null=True)
+    options = serializers.ListField(child=serializers.CharField(), required=False, allow_null=True)  # Handle options
 
     class Meta:
         model = Variants
-        fields = ['id', 'VariantName', 'subvariants', 'options']  # Include 'options'
+        fields = ['id', 'VariantName', 'subvariants', 'options']
 
 class ProductSerializer(serializers.ModelSerializer):
-    variants = VariantSerializer(many=True, required=False)
+    variants = VariantSerializer(many=True, required=False, allow_null=True)
 
     class Meta:
         model = Products
@@ -43,24 +44,15 @@ class ProductSerializer(serializers.ModelSerializer):
         )
 
         for variant_data in variants_data:
-            print(variant_data)
+            options = variant_data.pop('options', [])
             subvariants_data = variant_data.pop('subvariants', [])
             variant = Variants.objects.create(Product=product, **variant_data)
+            
+            # Handle options for the variant if necessary
             for subvariant_data in subvariants_data:
                 SubVariants.objects.create(Variant=variant, **subvariant_data)
-
+        
         return product
-
-    def get_next_product_id(self):
-        last_product = Products.objects.order_by('ProductID').last()
-        return (last_product.ProductID + 1) if last_product else 1000
-
-    def generate_product_code(self):
-        product_id = self.get_next_product_id()
-        return f"PRD{product_id}"
-
-    def generate_hsn_code(self):
-        return uuid.uuid4().hex[:8]
 
     def update(self, instance, validated_data):
         variants_data = validated_data.pop('variants', [])
@@ -73,6 +65,7 @@ class ProductSerializer(serializers.ModelSerializer):
         # Handle nested variants and subvariants
         existing_variants = {variant.id: variant for variant in instance.variants.all()}
         for variant_data in variants_data:
+            options = variant_data.pop('options', [])
             subvariants_data = variant_data.pop('subvariants', [])
             variant_id = variant_data.get('id', None)
             if variant_id and variant_id in existing_variants:

@@ -130,7 +130,9 @@ def product_detail(request, pk):
         return Response(serializer.data)
     elif request.method == 'PUT' or request.method == 'PATCH':
         serializer = ProductSerializer(product, data=request.data, partial=True)
+        print('serialiser : ' , serializer)
         if serializer.is_valid():
+            print('sssss')
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
