@@ -1,21 +1,54 @@
 from rest_framework import serializers
 from .models import Products, Variants, SubVariants
-import uuid
 
 class SubVariantSerializer(serializers.ModelSerializer):
-    options = serializers.ListField(child=serializers.CharField(), required=False, allow_null=True)  # Handle nested options
+    options = serializers.ListField(child=serializers.CharField(), required=False, allow_null=True)
 
     class Meta:
         model = SubVariants
-        fields = ['id', 'SubVariantName', 'Stock', 'options']
+        fields = ['id', 'SubVariantName', 'options']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if instance.Options:
+            representation['options'] = instance.Options.split(',')
+        else:
+            representation['options'] = []
+        return representation
+
+    def to_internal_value(self, data):
+        internal_value = super().to_internal_value(data)
+        options = data.get('options', [])
+        if options:
+            internal_value['Options'] = ','.join(options)
+        else:
+            internal_value['Options'] = ''
+        return internal_value
 
 class VariantSerializer(serializers.ModelSerializer):
     subvariants = SubVariantSerializer(many=True, required=False, allow_null=True)
-    options = serializers.ListField(child=serializers.CharField(), required=False, allow_null=True)  # Handle options
+    options = serializers.ListField(child=serializers.CharField(), required=False, allow_null=True)
 
     class Meta:
         model = Variants
         fields = ['id', 'VariantName', 'subvariants', 'options']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if instance.Options:
+            representation['options'] = instance.Options.split(',')
+        else:
+            representation['options'] = []
+        return representation
+
+    def to_internal_value(self, data):
+        internal_value = super().to_internal_value(data)
+        options = data.get('options', [])
+        if options:
+            internal_value['Options'] = ','.join(options)
+        else:
+            internal_value['Options'] = ''
+        return internal_value
 
 class ProductSerializer(serializers.ModelSerializer):
     variants = VariantSerializer(many=True, required=False, allow_null=True)
@@ -44,11 +77,9 @@ class ProductSerializer(serializers.ModelSerializer):
         )
 
         for variant_data in variants_data:
-            options = variant_data.pop('options', [])
             subvariants_data = variant_data.pop('subvariants', [])
             variant = Variants.objects.create(Product=product, **variant_data)
             
-            # Handle options for the variant if necessary
             for subvariant_data in subvariants_data:
                 SubVariants.objects.create(Variant=variant, **subvariant_data)
         
@@ -65,7 +96,6 @@ class ProductSerializer(serializers.ModelSerializer):
         # Handle nested variants and subvariants
         existing_variants = {variant.id: variant for variant in instance.variants.all()}
         for variant_data in variants_data:
-            options = variant_data.pop('options', [])
             subvariants_data = variant_data.pop('subvariants', [])
             variant_id = variant_data.get('id', None)
             if variant_id and variant_id in existing_variants:

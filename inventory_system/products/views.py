@@ -61,21 +61,20 @@ def product_list(request):
     if request.method == 'GET':
         products = Products.objects.all()
         serializer = ProductSerializer(products, many=True)
+        print(serializer.data)
         return Response(serializer.data)
     
     elif request.method == 'POST':
         if request.user.is_authenticated:
             if request.data:
                 print('data', request.data)
-                
-                # Extract data from request
                 user = request.user
                 product_name = request.data.get('ProductName')
                 product_image = request.FILES.get('ProductImage')
-                is_favourite = request.data.get('IsFavourite') == 'true'  # Convert string to boolean
-                active = request.data.get('Active') == 'true'  # Convert string to boolean
-                total_stock = int(request.data.get('TotalStock', 0))  # Convert to integer
-                variants_data = request.data.get('variants', '[]')  # Default to empty list if not provided
+                is_favourite = request.data.get('IsFavourite') == 'true'  
+                active = request.data.get('Active') == 'true'  
+                total_stock = int(request.data.get('TotalStock', 0))  
+                variants_data = request.data.get('variants', '[]') 
                 
                 # Parse variants_data from JSON string to Python list
                 import json
@@ -96,20 +95,22 @@ def product_list(request):
 
                 # Handle variants and subvariants
                 for variant_data in variants_data:
-                    options = variant_data.pop('options', [])
+                    print('variant name :' , variant_data['VariantName'])
+                    options = ','.join(variant_data.get('options', []))
+                    print('options :', options)
                     subvariants_data = variant_data.pop('subvariants', [])
-                    variant = Variants.objects.create(Product=product, **variant_data)
+                    variant = Variants.objects.create(Product=product,
+                                                      VariantName =variant_data['VariantName'],
+                                                      Options = options)
                     
                     # Handle options for the variant if necessary
                     for subvariant_data in subvariants_data:
                         print('subvariant_data', subvariant_data)
                         subvariant_name = subvariant_data['SubVariantName']
-                        stock = subvariant_data['Stock']
-                        options = ''.join(subvariant_data.get('options', []))  # Join options if provided
+                        options = ','.join(subvariant_data.get('options', []))  # Join options if provided
                         SubVariants.objects.create(
                             Variant=variant,
                             SubVariantName=subvariant_name,
-                            Stock=stock,
                             Options=options
                         )
                 return Response({'detail': 'Product created successfully'}, status=status.HTTP_201_CREATED)

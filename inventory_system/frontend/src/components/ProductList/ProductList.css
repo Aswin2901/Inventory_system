@@ -57,28 +57,34 @@ body {
     margin-bottom: 8px;
 }
 
-.product-variants {
+.product-variants,
+.product-subvariants {
     margin-top: 20px;
-}
-
-.variant-item {
-    margin-bottom: 20px;
     padding: 10px;
     border: 1px solid #D1D1D4;
     border-radius: 4px;
+    background: #f9f9f9;
 }
 
-.variant-details {
-    padding: 10px;
-    border: 1px solid #D1D1D4;
-    border-radius: 4px;
+.variant-item,
+.subvariant-item {
+    margin-bottom: 10px;
 }
 
-.variant-options, .subvariants-section {
+.variant-options,
+.subvariant-options {
     margin-top: 10px;
 }
 
-.option-item, .subvariant-item {
+.option-item {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.product-variants h4,
+.product-subvariants h4,
+.variant-options h6,
+.subvariant-options h6 {
     margin-bottom: 10px;
 }
 

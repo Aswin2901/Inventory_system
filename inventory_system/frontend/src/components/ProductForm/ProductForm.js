@@ -40,7 +40,7 @@ const ProductForm = () => {
   const handleAddSubVariant = (variantIndex) => {
     setVariants(prevVariants => {
       const updatedVariants = [...prevVariants];
-      updatedVariants[variantIndex].subvariants.push({ SubVariantName: '', Stock: 0, options: [] });
+      updatedVariants[variantIndex].subvariants.push({ SubVariantName: '', options: [] });
       return updatedVariants;
     });
   };
@@ -174,14 +174,7 @@ const ProductForm = () => {
                     required
                     className="form-control"
                   />
-                  <input
-                    type="number"
-                    placeholder="Stock"
-                    value={sub.Stock}
-                    onChange={(e) => handleSubVariantChange(variantIndex, subIndex, 'Stock', e.target.value)}
-                    required
-                    className="form-control"
-                  />
+                  
                   <div>
                     <h5>Options</h5>
                     {sub.options.map((option, optionIndex) => (
