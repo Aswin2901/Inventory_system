@@ -24,38 +24,43 @@ const ProductList = () => {
     <div className="product-list">
       <h2>Product List</h2>
       {error && <p className="error">Error fetching products: {error.message}</p>} 
-      <ul>
+      <div className="product-grid">
         {products.map(product => (
-          <li key={product.id} className="product-item">
-            <h3>{product.ProductName} - {product.ProductCode}</h3>
-            {product.ProductImage && <img src={product.ProductImage} alt={product.ProductName} className="product-image" />}
-            <p><strong>Created Date:</strong> {new Date(product.CreatedDate).toLocaleDateString()}</p>
-            <p><strong>Active:</strong> {product.Active ? 'Yes' : 'No'}</p>
-            <p><strong>Total Stock:</strong> {product.TotalStock}</p>
-            {product.variants && product.variants.length > 0 && (
-              <div className="variants">
-                <h4>Variants:</h4>
-                <ul>
-                  {product.variants.map(variant => (
-                    <li key={variant.id} className="variant-item">
-                      <h5>{variant.VariantName}</h5>
-                      {variant.subvariants && variant.subvariants.length > 0 && (
-                        <ul className="subvariants">
-                          {variant.subvariants.map(subvariant => (
-                            <li key={subvariant.id} className="subvariant-item">
-                              <p>{subvariant.SubVariantName} - Stock: {subvariant.Stock}</p>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          <div key={product.id} className="product-card">
+            {product.ProductImage && (
+              <img src={product.ProductImage} alt={product.ProductName} className="product-image" />
             )}
-          </li>
+            <div className="product-info">
+              <h3 className="product-name">{product.ProductName}</h3>
+              <p className="product-code">Code: {product.ProductCode}</p>
+              <p className="product-date"><strong>Created Date:</strong> {new Date(product.CreatedDate).toLocaleDateString()}</p>
+              <p className="product-active"><strong>Active:</strong> {product.Active ? 'Yes' : 'No'}</p>
+              <p className="product-stock"><strong>Total Stock:</strong> {product.TotalStock}</p>
+              {product.variants && product.variants.length > 0 && (
+                <div className="product-variants">
+                  <h4>Variants:</h4>
+                  <ul>
+                    {product.variants.map(variant => (
+                      <li key={variant.id} className="variant-item">
+                        <h5>{variant.VariantName}</h5>
+                        {variant.subvariants && variant.subvariants.length > 0 && (
+                          <ul className="subvariants">
+                            {variant.subvariants.map(subvariant => (
+                              <li key={subvariant.id} className="subvariant-item">
+                                <p>{subvariant.SubVariantName} - Stock: {subvariant.Stock}</p>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
