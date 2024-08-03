@@ -66,14 +66,22 @@ def product_list(request):
     elif request.method == 'POST':
         if request.user.is_authenticated:
             if request.data:
+                print('data', request.data)
+                
+                # Extract data from request
                 user = request.user
                 product_name = request.data.get('ProductName')
                 product_image = request.FILES.get('ProductImage')
-                is_favourite = request.data.get('IsFavourite', False)
-                active = request.data.get('Active', True)
-                total_stock = request.data.get('TotalStock', 0)
-                variants_data = request.data.get('variants', [])
+                is_favourite = request.data.get('IsFavourite') == 'true'  # Convert string to boolean
+                active = request.data.get('Active') == 'true'  # Convert string to boolean
+                total_stock = int(request.data.get('TotalStock', 0))  # Convert to integer
+                variants_data = request.data.get('variants', '[]')  # Default to empty list if not provided
                 
+                # Parse variants_data from JSON string to Python list
+                import json
+                variants_data = json.loads(variants_data)
+
+                # Create product
                 product = Products.objects.create(
                     ProductName=product_name,
                     ProductImage=product_image,
@@ -86,25 +94,24 @@ def product_list(request):
                     HSNCode=generate_hsn_code()
                 )
 
+                # Handle variants and subvariants
                 for variant_data in variants_data:
                     options = variant_data.pop('options', [])
                     subvariants_data = variant_data.pop('subvariants', [])
                     variant = Variants.objects.create(Product=product, **variant_data)
                     
-                    # Handle options for the variant here if necessary
+                    # Handle options for the variant if necessary
                     for subvariant_data in subvariants_data:
-                        print('subvariant_data' , subvariant_data)
+                        print('subvariant_data', subvariant_data)
                         subvariant_name = subvariant_data['SubVariantName']
                         stock = subvariant_data['Stock']
-                        options = ''
-                        for i in subvariant_data['options']:
-                            options += i
+                        options = ''.join(subvariant_data.get('options', []))  # Join options if provided
                         SubVariants.objects.create(
                             Variant=variant,
-                            SubVariantName = subvariant_name,
-                            Stock = stock,
-                            Options = options
-                            )
+                            SubVariantName=subvariant_name,
+                            Stock=stock,
+                            Options=options
+                        )
                 return Response({'detail': 'Product created successfully'}, status=status.HTTP_201_CREATED)
             else:
                 return Response({'detail': 'Data is not enough'}, status=status.HTTP_400_BAD_REQUEST)

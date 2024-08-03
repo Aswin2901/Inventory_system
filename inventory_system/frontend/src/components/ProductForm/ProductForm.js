@@ -59,17 +59,22 @@ const ProductForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = {
-      ProductName: productName,
-      ProductImage: productImage,
-      IsFavourite: isFavourite,
-      Active: active,
-      TotalStock: totalStock,
-      variants: variants
-    };
-
+  
+    // Create a new FormData object
+    const formData = new FormData();
+    formData.append('ProductName', productName);
+    formData.append('ProductImage', productImage); // Assuming productImage is a File object
+    formData.append('IsFavourite', isFavourite);
+    formData.append('Active', active);
+    formData.append('TotalStock', totalStock);
+    formData.append('variants', JSON.stringify(variants)); // Convert variants to JSON string
+  
     try {
-      await api.post('products/', data);
+      await api.post('products/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data' // Important for file uploads
+        }
+      });
       navigate('/product-list');
     } catch (error) {
       console.error('Error creating product:', error);
