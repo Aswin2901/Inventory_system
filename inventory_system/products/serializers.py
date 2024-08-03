@@ -19,38 +19,50 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Products
-        fields = ['id', 'ProductID', 'ProductCode', 'ProductName', 'ProductImage', 'CreatedDate', 'UpdatedDate', 'CreatedUser', 'IsFavourite', 'Active', 'HSNCode', 'TotalStock', 'variants']
+        fields = [
+            'id', 'ProductID', 'ProductCode', 'ProductName', 'ProductImage',
+            'CreatedDate', 'UpdatedDate', 'CreatedUser', 'IsFavourite',
+            'Active', 'HSNCode', 'TotalStock', 'variants'
+        ]
         read_only_fields = ['ProductID', 'ProductCode', 'CreatedDate', 'UpdatedDate', 'CreatedUser', 'HSNCode']
 
     def create(self, validated_data):
         variants_data = validated_data.pop('variants', [])
+        request = self.context.get('request')
+
+        if request and request.user.is_authenticated:
+            validated_data['CreatedUser'] = request.user
+
         product = Products.objects.create(
             **validated_data,
             ProductID=self.get_next_product_id(),
             ProductCode=self.generate_product_code(),
-            HSNCode=self.generate_hsn_code(),
-            CreatedUser=self.context['request'].user
+            HSNCode=self.generate_hsn_code()
         )
+
         for variant_data in variants_data:
             subvariants_data = variant_data.pop('subvariants', [])
             variant = Variants.objects.create(Product=product, **variant_data)
             for subvariant_data in subvariants_data:
                 SubVariants.objects.create(Variant=variant, **subvariant_data)
+
         return product
 
     def get_next_product_id(self):
         last_product = Products.objects.order_by('ProductID').last()
-        return (last_product.ProductID + 1) if last_product else 1000  # Default start ID
+        return (last_product.ProductID + 1) if last_product else 1000
 
     def generate_product_code(self):
         product_id = self.get_next_product_id()
         return f"PRD{product_id}"
 
     def generate_hsn_code(self):
-        return uuid.uuid4().hex[:8]  # Generate a unique HSN code
+        return uuid.uuid4().hex[:8]
 
     def update(self, instance, validated_data):
         variants_data = validated_data.pop('variants', [])
+
+        # Update product fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
@@ -67,7 +79,7 @@ class ProductSerializer(serializers.ModelSerializer):
                 variant.save()
             else:
                 variant = Variants.objects.create(Product=instance, **variant_data)
-            
+
             existing_subvariants = {subvariant.id: subvariant for subvariant in variant.subvariants.all()}
             for subvariant_data in subvariants_data:
                 subvariant_id = subvariant_data.get('id', None)
@@ -78,13 +90,13 @@ class ProductSerializer(serializers.ModelSerializer):
                     subvariant.save()
                 else:
                     SubVariants.objects.create(Variant=variant, **subvariant_data)
-            
-            # Delete any remaining subvariants
+
+            # Delete remaining subvariants
             for remaining_subvariant in existing_subvariants.values():
                 remaining_subvariant.delete()
-        
-        # Delete any remaining variants
+
+        # Delete remaining variants
         for remaining_variant in existing_variants.values():
             remaining_variant.delete()
-        
+
         return instance

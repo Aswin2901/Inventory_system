@@ -1,12 +1,13 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import ProductViewSet, VariantViewSet, SubVariantViewSet
-
-router = DefaultRouter()
-router.register(r'products', ProductViewSet)
-router.register(r'variants', VariantViewSet)
-router.register(r'subvariants', SubVariantViewSet)
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('token/', views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', views.TokenRefreshView.as_view(), name='token_refresh'),
+    path('products/', views.product_list, name='product-list'),
+    path('products/<uuid:pk>/', views.product_detail, name='product-detail'),
+    path('variants/', views.variant_list, name='variant-list'),
+    path('variants/<uuid:pk>/', views.variant_detail, name='variant-detail'),
+    path('subvariants/', views.subvariant_list, name='subvariant-list'),
+    path('subvariants/<uuid:pk>/', views.subvariant_detail, name='subvariant-detail'),
 ]

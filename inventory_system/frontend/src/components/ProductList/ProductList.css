@@ -1,0 +1,76 @@
+.product-list {
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+    background-color: #f4f4f9;
+  }
+  
+  .error {
+    color: #d9534f;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .product-item {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+  }
+  
+  .product-item:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: scale(1.02);
+  }
+  
+  .product-item h3 {
+    margin: 0;
+    color: #333;
+    font-size: 1.5em;
+  }
+  
+  .product-item p {
+    margin: 5px 0;
+    color: #666;
+  }
+  
+  .product-item .details {
+    margin-top: 15px;
+  }
+  
+  .variants {
+    margin-top: 20px;
+  }
+  
+  .variant-item {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    margin-top: 15px;
+  }
+  
+  .variant-item h5 {
+    margin: 0;
+    color: #555;
+    font-size: 1.2em;
+  }
+  
+  .subvariants {
+    margin-top: 10px;
+    padding-left: 20px;
+  }
+  
+  .subvariant-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .subvariant-item:last-child {
+    border-bottom: none;
+  }
+  
+  .subvariant-item p {
+    margin: 0;
+    color: #444;
+    font-size: 1em;
+  }
