@@ -29,6 +29,22 @@ This project is a web-based product management application built using React for
 - PostgreSQL (or your choice of database)
 - Git
 
+### Screanshots 
+- Login Page
+  ![Login page](https://github.com/user-attachments/assets/2d454981-8bb8-4ecf-867f-18a9d796260e)
+
+- Product List View
+   ![List View](https://github.com/user-attachments/assets/91ddb6b5-1abc-4886-a58b-175f05164c4e)
+   ![List-View2](https://github.com/user-attachments/assets/609ef0f5-6ec0-4514-98ba-9f1f78a2a35c)
+
+- Add Product
+  ![Add Product](https://github.com/user-attachments/assets/b3da9c31-79dd-4fb6-9b45-819e41ef0220)
+  ![Add-product-2](https://github.com/user-attachments/assets/1529afc7-ec22-4a1d-bfa1-bebedd9eb4c0)
+
+
+
+
+
 ### Installation
 
 #### Frontend
