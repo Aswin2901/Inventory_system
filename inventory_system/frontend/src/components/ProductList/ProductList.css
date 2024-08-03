@@ -21,20 +21,26 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+    justify-content: space-between; /* Adjusts alignment to utilize space */
 }
 
 .product-card {
     background: #fff;
     border-radius: 8px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    width: calc(33.333% - 20px);
+    flex: 1 1 calc(33.333% - 20px); /* Allows flexibility and responsiveness */
     padding: 20px;
+    max-width: calc(33.333% - 20px); /* Ensures maximum width */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Adjusts layout for a more consistent card height */
 }
 
 .product-image {
     width: 100%;
     height: auto;
     border-radius: 8px;
+    object-fit: cover; /* Ensures the image covers the space without distortion */
 }
 
 .product-info {
@@ -87,6 +93,7 @@ body {
     font-weight: 700;
     transition: background 0.3s;
     margin-right: 10px;
+    margin-top: 10px; /* Added margin to separate from other elements */
 }
 
 .btn:hover {

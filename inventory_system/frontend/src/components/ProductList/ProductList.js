@@ -44,8 +44,17 @@ const ProductList = () => {
       <div className="product-grid">
         {products.map(product => (
           <div key={product.id} className="product-card">
-            {product.ProductImage && (
-              <img src={product.ProductImage} alt={product.ProductName} className="product-image" />
+            {
+              console.log(product.ProductImage) 
+            }
+
+            {
+            product.ProductImage && (
+              <img
+                src={`${process.env.REACT_APP_API_URL}${product.ProductImage}`} // Concatenate API URL with image path
+                alt={product.ProductName}
+                className="product-image"
+              />
             )}
             <div className="product-info">
               <h3 className="product-name">{product.ProductName}</h3>
