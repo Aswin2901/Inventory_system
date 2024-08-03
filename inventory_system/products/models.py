@@ -56,6 +56,7 @@ class SubVariants(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     Variant = models.ForeignKey(Variants, related_name="subvariants", on_delete=models.CASCADE)
     SubVariantName = models.CharField(max_length=255)
+    Options = models.CharField(max_length=255 , null=True)
     Stock = models.DecimalField(default=0.00, max_digits=20, decimal_places=8)
 
     class Meta:

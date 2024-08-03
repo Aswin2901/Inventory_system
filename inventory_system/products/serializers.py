@@ -1,18 +1,20 @@
 from rest_framework import serializers
 from .models import Products, Variants, SubVariants
-import uuid
 
 class SubVariantSerializer(serializers.ModelSerializer):
+    options = serializers.ListField(child=serializers.CharField(), required=False)  # Handle nested options
+
     class Meta:
         model = SubVariants
-        fields = ['id', 'SubVariantName', 'Stock']
+        fields = ['id', 'SubVariantName', 'Stock', 'options']  # Include 'options'
 
 class VariantSerializer(serializers.ModelSerializer):
     subvariants = SubVariantSerializer(many=True, required=False)
+    options = serializers.ListField(child=serializers.CharField(), required=False)  # Handle options
 
     class Meta:
         model = Variants
-        fields = ['id', 'VariantName', 'subvariants']
+        fields = ['id', 'VariantName', 'subvariants', 'options']  # Include 'options'
 
 class ProductSerializer(serializers.ModelSerializer):
     variants = VariantSerializer(many=True, required=False)
@@ -41,6 +43,7 @@ class ProductSerializer(serializers.ModelSerializer):
         )
 
         for variant_data in variants_data:
+            print(variant_data)
             subvariants_data = variant_data.pop('subvariants', [])
             variant = Variants.objects.create(Product=product, **variant_data)
             for subvariant_data in subvariants_data:

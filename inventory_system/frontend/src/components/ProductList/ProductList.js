@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/api'; 
-import './ProductList.css'; // Import your CSS file
+import './ProductList.css'; 
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -28,6 +28,7 @@ const ProductList = () => {
         {products.map(product => (
           <li key={product.id} className="product-item">
             <h3>{product.ProductName} - {product.ProductCode}</h3>
+            {product.ProductImage && <img src={product.ProductImage} alt={product.ProductName} className="product-image" />}
             <p><strong>Created Date:</strong> {new Date(product.CreatedDate).toLocaleDateString()}</p>
             <p><strong>Active:</strong> {product.Active ? 'Yes' : 'No'}</p>
             <p><strong>Total Stock:</strong> {product.TotalStock}</p>

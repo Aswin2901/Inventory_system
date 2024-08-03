@@ -1,14 +1,13 @@
+import uuid
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-
 from rest_framework import status
 from .models import Products, Variants, SubVariants
 from .serializers import ProductSerializer, VariantSerializer, SubVariantSerializer
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -26,11 +25,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if user is None:
             raise ValidationError('Invalid username or password')
 
-        # Check if the user is active
         if not user.is_active:
             raise ValidationError('User account is inactive')
 
-        # Validate and get token if user is valid
         data = super().validate(attrs)
         data['token'] = cls.get_token(user).access_token
         return data
@@ -38,6 +35,26 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['username'] = user.username
+        return token
+
+class CustomTokenRefreshView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer
+
+def get_next_product_id():
+    last_product = Products.objects.order_by('ProductID').last()
+    return (last_product.ProductID + 1) if last_product else 1000
+
+def generate_product_code():
+    product_id = get_next_product_id()
+    return f"PRD{product_id}"
+
+def generate_hsn_code():
+    return uuid.uuid4().hex[:8]
 
 @api_view(['GET', 'POST'])
 def product_list(request):
@@ -48,11 +65,49 @@ def product_list(request):
     
     elif request.method == 'POST':
         if request.user.is_authenticated:
-            serializer = ProductSerializer(data=request.data, context={'request': request})
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if request.data:
+                user = request.user
+                product_name = request.data.get('ProductName')
+                product_image = request.FILES.get('ProductImage')
+                is_favourite = request.data.get('IsFavourite', False)
+                active = request.data.get('Active', True)
+                total_stock = request.data.get('TotalStock', 0)
+                variants_data = request.data.get('variants', [])
+                
+                product = Products.objects.create(
+                    ProductName=product_name,
+                    ProductImage=product_image,
+                    IsFavourite=is_favourite,
+                    CreatedUser=user,
+                    Active=active,
+                    TotalStock=total_stock,
+                    ProductID=get_next_product_id(),
+                    ProductCode=generate_product_code(),
+                    HSNCode=generate_hsn_code()
+                )
+
+                for variant_data in variants_data:
+                    options = variant_data.pop('options', [])
+                    subvariants_data = variant_data.pop('subvariants', [])
+                    variant = Variants.objects.create(Product=product, **variant_data)
+                    
+                    # Handle options for the variant here if necessary
+                    for subvariant_data in subvariants_data:
+                        print('subvariant_data' , subvariant_data)
+                        subvariant_name = subvariant_data['SubVariantName']
+                        stock = subvariant_data['Stock']
+                        options = ''
+                        for i in subvariant_data['options']:
+                            options += i
+                        SubVariants.objects.create(
+                            Variant=variant,
+                            SubVariantName = subvariant_name,
+                            Stock = stock,
+                            Options = options
+                            )
+                return Response({'detail': 'Product created successfully'}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'detail': 'Data is not enough'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'detail': 'Authentication credentials were not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
 
