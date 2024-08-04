@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './LoginPage.css'; // Import the CSS file
+import { useAuth } from '../../AuthContext'; // Adjust the path to where AuthContext is located
+import './LoginPage.css';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // Access the login function from AuthContext
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -16,11 +18,9 @@ const LoginPage = () => {
         username,
         password,
       });
-      localStorage.setItem('token', response.data.access);
-      // Redirect to ProductList page
+      login(response.data.access); // Use the login function to update authentication state
       navigate('/product-list');
     } catch (error) {
-      // Handle errors
       setError('Invalid credentials');
     }
   };
@@ -30,7 +30,7 @@ const LoginPage = () => {
       <div className="screen">
         <div className="screen__content">
           <div className="login">
-          <h3>Login Here !</h3>
+            <h3>Login Here !</h3>
             <form onSubmit={handleSubmit}>
               <div className="login__field">
                 <input
