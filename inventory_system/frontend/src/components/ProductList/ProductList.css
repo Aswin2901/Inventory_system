@@ -3,13 +3,17 @@
 * {
     box-sizing: border-box;
     margin: 0;
-    padding: 0;    
+    padding: 0;
     font-family: Raleway, sans-serif;
 }
 
 body {
     background: linear-gradient(90deg, #C7C5F4, #776BCC);
     padding: 20px;
+}
+.Heading{
+    margin-top: 0;
+    padding-bottom: 10px;
 }
 
 .product-list {
@@ -21,26 +25,26 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    justify-content: space-between; /* Adjusts alignment to utilize space */
+    justify-content: space-between;
 }
 
 .product-card {
     background: #fff;
     border-radius: 8px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    flex: 1 1 calc(33.333% - 20px); /* Allows flexibility and responsiveness */
-    padding: 20px;
-    max-width: calc(33.333% - 20px); /* Ensures maximum width */
+    flex: 1 1 calc(30% - 20px); /* Adjusted for smaller cards */
+    padding: 10px; /* Adjusted padding */
+    max-width: calc(30% - 20px); /* Ensures maximum width */
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Adjusts layout for a more consistent card height */
+    justify-content: space-between;
 }
 
 .product-image {
     width: 100%;
     height: auto;
     border-radius: 8px;
-    object-fit: cover; /* Ensures the image covers the space without distortion */
+    object-fit: cover;
 }
 
 .product-info {
@@ -99,7 +103,7 @@ body {
     font-weight: 700;
     transition: background 0.3s;
     margin-right: 10px;
-    margin-top: 10px; /* Added margin to separate from other elements */
+    margin-top: 10px;
 }
 
 .btn:hover {
@@ -126,4 +130,41 @@ body {
     color: #E74C3C;
     font-weight: 700;
     margin-bottom: 20px;
+}
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    background: #6C63AC;
+    border: none;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    transition: background 0.3s;
+    margin: 0 5px;
+}
+
+.pagination button:disabled {
+    background: #D1D1D4;
+    cursor: not-allowed;
+}
+
+.pagination button:not(:disabled):hover {
+    background: #5D54A4;
+}
+
+.pagination span {
+    font-size: 14px;
+    font-weight: 700;
+    color: #4C489D;
+    margin: 0 10px;
 }
