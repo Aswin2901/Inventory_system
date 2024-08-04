@@ -9,6 +9,7 @@ const EditProduct = () => {
   const [error, setError] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const navigate = useNavigate(); // Initialize useNavigate
+  const [editImage, setEditImage] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -38,7 +39,9 @@ const EditProduct = () => {
     const formData = new FormData();
     formData.append('ProductName', productData.ProductName);
     formData.append('ProductCode', productData.ProductCode);
-    formData.append('ProductImage', imageFile); // Append the image file if it's not null
+    if (imageFile) {
+      formData.append('ProductImage', imageFile); 
+    }
     formData.append('CreatedDate', productData.CreatedDate);
     formData.append('Active', productData.Active);
     formData.append('TotalStock', productData.TotalStock);
@@ -49,7 +52,7 @@ const EditProduct = () => {
           'Content-Type': 'multipart/form-data', // Set content type to multipart
         },
       });
-      navigate('/'); // Navigate back to the product list after saving
+      navigate('/product-list'); // Navigate back to the product list after saving
     } catch (error) {
       console.error('There was an error updating the product!', error.response?.data || error.message);
       setError(error);
@@ -57,7 +60,13 @@ const EditProduct = () => {
   };
 
   const handleCancel = () => {
-    navigate('/'); // Navigate back to the product list if cancel
+    navigate('/product-list'); 
+  };
+
+  const handleEditImage = () => {
+    setEditImage(true);
+    setImageFile(null);
+    setProductData(prevData => ({ ...prevData, ProductImage: null }));
   };
 
   return (
@@ -65,8 +74,17 @@ const EditProduct = () => {
       <h2>Edit Product</h2>
       {error && <p className="error">Error: {error.message}</p>}
       <div className="product-image">
-        {productData.ProductImage && (
-          <img src={productData.ProductImage} alt={productData.ProductName} />
+        {productData.ProductImage && !editImage && (
+          <div>
+            <img src={`${process.env.REACT_APP_API_URL}${productData.ProductImage}`} alt={productData.ProductName} className="product-image-preview"/>
+            <button type="button" onClick={handleEditImage} className="edit-image-button">Edit Image</button>
+          </div>
+        )}
+        {!productData.ProductImage && !editImage && (
+          <input type="file" name="ProductImage" onChange={handleImageChange} />
+        )}
+        {editImage && (
+          <input type="file" name="ProductImage" onChange={handleImageChange} />
         )}
       </div>
       <form onSubmit={handleSubmit}>
@@ -77,10 +95,6 @@ const EditProduct = () => {
         <label>
           Product Code:
           <input type="text" name="ProductCode" value={productData.ProductCode || ''} onChange={handleChange} required />
-        </label>
-        <label>
-          Product Image:
-          <input type="file" name="ProductImage" onChange={handleImageChange} />
         </label>
         <label>
           Created Date:
@@ -94,8 +108,8 @@ const EditProduct = () => {
           Total Stock:
           <input type="number" name="TotalStock" value={productData.TotalStock || 0} onChange={handleChange} />
         </label>
-        <button type="submit">Save</button>
-        <button type="button" onClick={handleCancel}>Cancel</button>
+        <button type="submit" className="save-button">Save</button>
+        <button type="button" className="cancel-button" onClick={handleCancel}>Cancel</button>
       </form>
     </div>
   );

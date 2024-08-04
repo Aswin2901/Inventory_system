@@ -6,6 +6,7 @@ from rest_framework import status
 from .models import Products, Variants, SubVariants
 from .serializers import ProductSerializer, VariantSerializer, SubVariantSerializer
 from django.contrib.auth import authenticate
+from django.utils.dateparse import parse_datetime
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 
@@ -61,13 +62,11 @@ def product_list(request):
     if request.method == 'GET':
         products = Products.objects.all()
         serializer = ProductSerializer(products, many=True)
-        print(serializer.data)
         return Response(serializer.data)
     
     elif request.method == 'POST':
         if request.user.is_authenticated:
             if request.data:
-                print('data', request.data)
                 user = request.user
                 product_name = request.data.get('ProductName')
                 product_image = request.FILES.get('ProductImage')
@@ -129,18 +128,35 @@ def product_detail(request, pk):
     if request.method == 'GET':
         serializer = ProductSerializer(product)
         return Response(serializer.data)
-    elif request.method == 'PUT' or request.method == 'PATCH':
-        serializer = ProductSerializer(product, data=request.data, partial=True)
-        print('serialiser : ' , serializer)
-        if serializer.is_valid():
-            print('sssss')
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method in ['PUT', 'PATCH']:
+        data = request.data
+
+        for field in data:
+            if hasattr(product, field):
+                value = data[field]
+                if field == 'Active':
+                    value = value.lower() == 'true'
+                elif field == 'CreatedDate':
+                    value = parse_datetime(value)
+                elif field == 'TotalStock':
+                    value = float(value)
+                elif field == 'ProductImage':
+                    if value == 'null':
+                        value = None
+                    elif value != 'null':
+                        value = request.FILES.get('ProductImage', None)
+                setattr(product, field, value)
+        
+        try:
+            product.save()
+            return Response({"message": "Product updated successfully"})
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
+    
+    
 @api_view(['GET', 'POST'])
 def variant_list(request):
     if request.method == 'GET':
